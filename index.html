@@ -1,55 +1,454 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="ru">
+
 <head>
-    <meta charset="utf-8">
-    <title>Vue Bootstrap Table</title>
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
-    <link rel="stylesheet" href="examples/app.css">
-    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <meta charset="utf-8" >
+    <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png" >
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png" >
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+    <title>Система управления заказами dgwr.ru</title>
+    <meta name="viewport" content="initial-scale=1.0, width=device-width">
+    <!-- Bootstrap core CSS     -->
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" >
+    <!--     Fonts and icons     -->
+    <link href="assets/css/font-awesome.min.css" rel="stylesheet">
+    <link href="assets/css/font-muli.css" rel='stylesheet' type='text/css'>
+    <link href="assets/css/themify-icons.css" rel="stylesheet">
+    <link href="assets/vendors/sweetalert/css/sweetalert2.min.css" rel="Stylesheet" >
+    <!--  all styles CSS    -->
+    <link href="assets/css/amaze.css" rel="stylesheet" >
 </head>
+
 <body>
-<style>
-    .colstyletest {
-        background-color: #000066;
-    }
-
-    .cellstyletest {
-        background-color: #a94442;
-    }
-</style>
-
-<div class="container-fluid">
-    <h1>Vue Bootstrap Table</h1>
-    <div id="app">
-        <div class="row">
-            <div class="col-sm-12">
-                <button @click="addItem" class="btn btn-primary"><i class="glyphicon glyphicon-plus-sign"></i> Add an item</button>
-                <button @click="toggleFilter" class="btn btn-default">Toggle Filter</button>
-                <button @click="togglePicker" class="btn btn-default">Toggle Column Picker</button>
-                <button @click="togglePagination" class="btn btn-default">Toggle Pagination</button>
-            </div>
-            <br/><br/>
-            <vue-bootstrap-table
-                    :columns="columns"
-                    :values="values"
-                    :show-filter="showFilter"
-                    :show-column-picker="showPicker"
-                    :paginated="paginated"
-                    :multi-column-sortable="multiColumnSortable"
-                    :ajax="ajax"
-                    :row-click-handler=handleRowFunction
-                    :filter-case-sensitive=false
-            >
-            </vue-bootstrap-table>
+<div class="wrapper">
+    <div class="sidebar" data-background-color="brown" data-active-color="danger">
+        <div class="logo">
+            <img src="assets/img/logo.png" alt="logo">
+            <a href="#" class="simple-text">
+                Система управления заказами dgwr.ru
+            </a>
         </div>
-        <h2>Events Received</h2>
-        <div>
-            {{ logging }}
+        <div class="logo logo-mini">
+            <img src="assets/img/logo.png" alt="logo">
+            <a href="#" class="simple-text">
+                Dgwr.ru
+            </a>
+        </div>
+        <div class="sidebar-wrapper">
+            <ul class="nav">
+                <li>
+                    <a href="lenta-news.html">
+                        <i class="fa fa-calendar-check-o"></i>
+                        <p>Лента</p>
+                    </a>
+                </li>
+                <li class="item-add active">
+                    <a href="orders-manager.html">
+                        <i class="ti-money"></i>
+                        <p>Заказы</p>
+                    </a>
+                    <a href="order-new-manager.html" class="link-add">
+                        <i class="ti-plus"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="agents.html">
+                        <i class="fa fa-user-plus"></i>
+                        <p>Агенты</p>
+                    </a>
+                </li>
+                <li class="item-add">
+                    <a href="clients.html">
+                        <i class="fa fa-child"></i>
+                        <p>Клиенты</p>
+                    </a>
+                    <a href="client-new.html" class="link-add">
+                        <i class="ti-plus"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="documents.html">
+                        <i class="ti-notepad"></i>
+                        <p>Бух. документы</p>
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
+    <div class="main-panel">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-minimize">
+                    <button id="minimizeSidebar" class="btn btn-round btn-white btn-fill btn-just-icon">
+                        <i class="ti-arrow-left"></i>
+                    </button>
+                </div>
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Заказы</a>
+                    <form class="form-search" form action="/q/" method="get">
+                        <div class="input-group">
+                            <i class="input-group-addon ti-search"></i>
+                            <input name="q" type="search" placeholder="Поиск" class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a class="user-link" href="#" data-title="Юлий Гусман менеджер">
+                                <i class="ti-user"></i>
+                                <p><span class="user-name">Юлий Гусман</span> <span class="user-post">менеджер</span></p>
+                            </a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="ti-bell"></i>
+                                <span class="notification">2</span>
+                                <p class="hidden-lg hidden-md">
+                                    Сообщения
+                                    <b class="caret"></b>
+                                </p>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#">5 новых сообщений</a>
+                                </li>
+                                <li>
+                                    <a href="#">Вы теперь друзья с Mike</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" title="Выйти">
+                                <i class="ti-shift-right"></i>
+                                <p class="hidden-lg hidden-md">Выйти</p>
+                            </a>
+                        </li>
+                        <li class="separator hidden-lg hidden-md"></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="content">
+            <div class="container-fluid">
+                <div class="header header-flex">
+                    <h3 class="title">Заказы</h3>
+                    <button class="btn btn-just-icon btn-simple btn-filter" data-toggle="collapse" data-target="#filter-card"><i class="ti-filter"></i><span>Фильтр</span></button>
+                </div>
+                <div id="app">
+                    <vue-bootstrap-table
+                            :columns="columns"
+                            :filter-key="formfilter2"
+                            :values="values"
+                            :show-filter="showFilter"
+                            :show-column-picker="showPicker"
+                            :paginated="paginated"
+                            :multi-column-sortable="multiColumnSortable"
+                            :ajax="ajax"
+                            :row-click-handler=handleRowFunction
+                            :filter-case-sensitive=false
+                    >
+                        <template scope="{formData}">
+                        <div id="filter-card" class="collapse filter">
+                            <form class="form-horizontal">
+                                <fieldset>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label class="col-sm-2 col-md-4 control-label">Номер</label>
+                                                <div class="col-sm-10 col-md-8">
+                                                    <input type="text" class="form-control" v-model="formfilter.orderId">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-2 col-md-4 control-label">Клиент</label>
+                                                <div class="col-sm-10 col-md-8 select">
+                                                    <select class="form-control" v-model="formfilter.client">
+                                                        <option disabled selected>Выберите клиента</option>
+                                                        <option>Миша Галустян</option>
+                                                        <option>Сергей Светлаков</option>
+                                                        <option>Семен Слепаков</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label class="col-sm-2 col-md-4 control-label">Дата от</label>
+                                                <div class="col-sm-10 col-md-8">
+                                                    <input type="text" class="form-control datepickerFrom" v-model="formfilter.dateFrom">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-2 col-md-4 control-label">Агент</label>
+                                                <div class="col-sm-10 col-md-8 select">
+                                                    <select class="form-control" v-model="formfilter.agent">
+                                                        <option>Прямой договор</option>
+                                                        <option>Леонид Ярмольник</option>
+                                                        <option>Дмитрий Нагиев</option>
+                                                        <option>Константин Эрнст</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label class="col-sm-2 col-md-4 control-label">Дата до</label>
+                                                <div class="col-sm-10 col-md-8">
+                                                    <input type="text" class="form-control datepicker" v-model="formfilter.dateTo">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-2 col-md-4 control-label">Статус</label>
+                                                <div class="col-sm-10 col-md-8 select">
+                                                    <select class="form-control" v-model="formfilter.status">
+                                                        <option>Любой статус</option>
+                                                        <option>расчет и подбор</option>
+                                                        <option>не удалось связаться</option>
+                                                        <option>приостановлен</option>
+                                                        <option>восстановлен</option>
+                                                        <option>поставлен на опцию</option>
+                                                        <option>ожидается оплата</option>
+                                                        <option>КК доработка</option>
+                                                        <option>оплачен полностью</option>
+                                                        <option>частично оплачен</option>
+                                                        <option>отказ</option>
+                                                        <option>КК есть фидбек</option>
+                                                        <option>КК отказ</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                        </template>
+                    </vue-bootstrap-table>
+                </div>
 
+
+            </div>
+        </div>
+        <footer class="footer">
+            <div class="container-fluid">
+                <p class="copyright">
+                    &copy;
+                    <script>
+                        document.write(new Date().getFullYear())
+                    </script>
+                    <a href="#">Система управления заказами dgwr.ru</a>
+                </p>
+            </div>
+        </footer>
+    </div>
 </div>
+<!--   Core JS Files   -->
+<script src="assets/vendors/jquery-3.1.1.min.js" type="text/javascript"></script>
+<script src="assets/vendors/jquery-ui.min.js" type="text/javascript"></script>
+<script src="assets/vendors/bootstrap.min.js" type="text/javascript"></script>
+<script src="assets/vendors/material.min.js" type="text/javascript"></script>
+<script src="assets/vendors/perfect-scrollbar.jquery.min.js" type="text/javascript"></script>
+<!-- Forms Validations Plugin -->
+<script src="assets/vendors/jquery.validate.min.js"></script>
+<!--  Plugin for Date Time Picker and Full Calendar Plugin-->
+<script src="assets/vendors/moment.min.js"></script>
+<script src="assets/vendors/moment-with-locales.min.js"></script>
+<!--  Plugin for the Wizard -->
+<script src="assets/vendors/jquery.bootstrap-wizard.js"></script>
+<!--  Notifications Plugin    -->
+<script src="assets/vendors/bootstrap-notify.js"></script>
+<!-- DateTimePicker Plugin -->
+<script src="assets/vendors/bootstrap-datetimepicker.js"></script>
+<!-- Select Plugin -->
+<script src="assets/vendors/jquery.select-bootstrap.js"></script>
+<!--  Checkbox, Radio, Switch and Tags Input Plugins -->
+<script src="assets/vendors/bootstrap-checkbox-radio-switch-tags.js"></script>
+<!-- Sweet Alert 2 plugin -->
+<script src="assets/vendors/sweetalert/js/sweetalert2.min.js"></script>
+<!--	Plugin for Fileupload, full documentation here: http://www.jasny.net/bootstrap/javascript/#fileinput -->
+<script src="assets/vendors/jasny-bootstrap.min.js"></script>
+<!--all javascript methods -->
+<script src="assets/js/amaze.js"></script>
 <script src="node_modules/vue/dist/vue.js"></script>
 <script src="build/bundle.js"></script>
+<script>
+  var renderfu = function (colname, entry) {
+    return '<div class="btn-group" role="group" >'+
+      '  <button type="button" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></button>'+
+      '  <button type="button" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>'+
+      '</div><span>'+JSON.stringify(entry)+'</span>';
+  };
+
+  var handleRow = function (event, entry) {
+    console.log("CLICK ROW: " + JSON.stringify(entry));
+  };
+
+  new Vue({
+    el: '#app',
+    components: {
+      VueBootstrapTable,
+    },
+    data: {
+      logging: [],
+      showFilter: false,
+      showPicker: true,
+      paginated: true,
+      multiColumnSortable: true,
+      handleRowFunction: handleRow,
+      ajax: {
+        enabled: false,
+        url: "http://crm.dgwr.ktc.bz/ajax/request.php",
+        method: "POST",
+        delegate: true,
+      },
+      formfilter: {
+        orderId: "213",
+        client: "123",
+        dateFrom: "34",
+        dateTo: "34",
+        status: "34",
+        agent: "34",
+      },
+      columns: [
+        {
+          title: "Id",
+          name: "id",
+          columnstyle: "colstyletest",
+          cellstyle: "cellstyletest"
+        },
+        {
+          title: "Name",
+          name: "title",
+          visible: true,
+          editable: true,
+        },
+        {
+          title: "Test",
+          visible: true,
+          renderfunction: renderfu
+        }
+      ],
+
+      values: [
+        {
+          "id": 1,
+          "title": "john",
+          "additionalRow": "<tr><td>asdasd</td></tr>",
+          "additionalShow": false
+        },
+        {
+          "id": 1,
+          "title": "mary",
+        },
+        {
+          "id": 1,
+          "title": "jack",
+        },
+        {
+          "id": 1,
+          "title": "joe",
+        },
+        {
+          "id": 2,
+          "title": "ana",
+        },
+        {
+          "id": 2,
+          "title": "rita",
+        },
+        {
+          "id": 2,
+          "title": "mario",
+        },
+        {
+          "id": 2,
+          "title": "luigi",
+        },
+        {
+          "id": 2,
+          "title": "mickey",
+        },
+        {
+          "id": 3,
+          "title": "donald",
+        },
+        {
+          "id": 3,
+          "title": "juliet",
+        }
+
+      ]
+    },
+    created: function () {
+      var self = this;
+      this.$on('cellDataModifiedEvent',
+        function( originalValue, newValue, columnTitle, entry) {
+          self.logging.push("cellDataModifiedEvent - Original Value : " + originalValue +
+            " | New Value : " + newValue +
+            " | Column : " + columnTitle +
+            " | Complete Entry : " +  entry );
+        }
+      );
+      this.$on('ajaxLoadedEvent',
+        function( data ) {
+          this.logging.push("ajaxLoadedEvent - data : " + data );
+        }
+      );
+      this.$on('ajaxLoadingError',
+        function( error ) {
+          this.logging.push("ajaxLoadingError - error : " + error );
+        }
+      );
+    },
+    mounted() {
+      var self = this;
+      $('.datepickerFrom').datetimepicker({
+        format: 'DD/MM/YYYY',
+        locale: 'ru',
+        icons: {
+          time: "fa fa-clock-o",
+          date: "fa fa-calendar",
+          up: "fa fa-chevron-up",
+          down: "fa fa-chevron-down",
+          previous: 'fa fa-chevron-left',
+          next: 'fa fa-chevron-right',
+          today: 'fa fa-screenshot',
+          clear: 'fa fa-trash',
+          close: 'fa fa-remove',
+          inline: true
+        }
+      }).on('dp.change', function(date) {
+        self.formfilter.dateFrom = $('.datepickerFrom').val();
+      });
+
+    },
+    methods: {
+      addItem: function () {
+        var self = this;
+        var item = {
+          "id": this.values.length + 1,
+          "name": "name " + (this.values.length + 1)
+        };
+        this.values.push(item);
+      },
+      toggleFilter: function () {
+        this.showFilter = !this.showFilter;
+      },
+      togglePicker: function () {
+        this.showPicker = !this.showPicker;
+      },
+      togglePagination: function () {
+        this.paginated = !this.paginated;
+      }
+    },
+  });
+</script>
 </body>
 </html>

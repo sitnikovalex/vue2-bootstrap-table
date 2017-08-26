@@ -2,18 +2,20 @@
     <div id="maindiv" @click="closeDropdown" @keyup.esc="closeDropdown">
         <!--<pre>{{columns}}</pre>-->
         <!--<pre>{{$data}}</pre>-->
-        <div class="col-sm-6">
-            <div v-if="showFilter" style="padding-top: 10px;padding-bottom: 10px;">
+        <slot :form-data="filterKey"></slot>
+
+        <div class="col-sm-6" v-if="showFilter">
+            <div style="padding-top: 10px;padding-bottom: 10px;">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Filter" v-model="filterKey">
+                    <input type="hidden" class="form-control" placeholder="Filter" v-model="JSON.stringify(filterKey)">
                     <div class="input-group-addon">
                         <i class="glyphicon glyphicon-search"></i>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6">
-            <div v-if="showColumnPicker" style="padding-top: 10px;padding-bottom: 10px;float:right;">
+        <div class="col-sm-6" v-if="showColumnPicker">
+            <div style="padding-top: 10px;padding-bottom: 10px;float:right;">
                 <div class="btn-group" :class="{'open' : columnMenuOpen}">
                     <button @click.stop.prevent="columnMenuOpen = !columnMenuOpen" @keyup.esc="columnMenuOpen = false"
                             type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
@@ -30,11 +32,16 @@
                 </div>
             </div>
         </div>
+        <div class="row">
         <div class="col-sm-12">
             <div id="loadingdiv" :class="{'vue-table-loading': this.loading , 'vue-table-loading-hidden': !this.loading}">
                 <div class="spinner"></div>
             </div>
-            <table class="table table-bordered table-hover table-condensed table-striped vue-table">
+
+            <div class="card">
+                <div class="content">
+                    <div class="table-responsive">
+                        <table class="table table-orders vue-table">
                 <thead>
                     <tr>
                         <th v-for="column in displayColsVisible" @click="sortBy($event, column.name)"
@@ -45,20 +52,34 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="entry in filteredValuesSorted " track-by="entry" @click="rowClickHandler($event, entry)">
-                        <td v-for="column in displayColsVisible" track-by="column"
-                            v-show="column.visible" :class="column.cellstyle">
-                            <span v-if="column.renderfunction!==false" v-html="column.renderfunction( column.name, entry )"></span>
-                            <span v-else-if="!column.editable"> {{ entry[column.name] }} </span>
-                            <value-field-section v-else
-                                :entry="entry"
-                                :columnname="column.name"></value-field-section>
-                        </td>
-                    </tr>
+                    <template v-for="entry in filteredValuesSorted " track-by="entry">
+                        <tr @click="rowClickHandler($event, entry)" :class="{'open' : entry.additionalShow}">
+                            <td v-for="column in displayColsVisible" track-by="column"
+                                v-show="column.visible" :class="column.cellstyle">
+                                <span v-if="column.renderfunction!==false" v-html="column.renderfunction( column.name, entry )"></span>
+                                <span v-else-if="!column.editable && column.name!=='id'" v-html="entry[column.name]"></span>
+                                <span v-else-if="!column.editable && column.name==='id'"><a v-bind:href="entry.url">{{entry[column.name]}}</a></span>
+                                <value-field-section v-else
+                                    :entry="entry"
+                                    :columnname="column.name"></value-field-section>
+                            </td>
+                            <td v-if="entry.additionalRow" class="actions">
+                                <button class="btn btn-just-icon btn-simple btn-more" v-on:click="entry.additionalShow = !entry.additionalShow" aria-expanded="true"><i v-bind:class="[{ 'ti-plus': !entry.additionalShow, 'ti-minus': entry.additionalShow  }]"></i></button>
+                            </td>
+                        </tr>
+                        <tr v-if="entry.additionalRow" v-html="entry.additionalRow" class="more-content" v-show="entry.additionalShow">
+
+                        </tr>
+
+                    </template>
                 </tbody>
             </table>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div v-if="paginated" class="col-sm-12">
+        </div>
+        <div v-if="paginated && validPageNumbers[1]" class="col-sm-12">
             <div class="btn-toolbar" role="toolbar" aria-label="pagination bar">
               <div class="btn-group" role="group" aria-label="first page">
                 <button type="button" class="btn btn-default" @click="page=1">&laquo;</button>
@@ -228,6 +249,7 @@
         components: {
             'value-field-section': valueFieldSection,
         },
+        replace: false,
         props: {
             /**
              * The column titles, required
@@ -303,6 +325,10 @@
             /**
              * If loading of table is to be done through ajax, then this object must be set
              */
+            filterKey: {
+                type: Object,
+                required: true,
+            },
             ajax: {
                 type: Object,
                 required: false,
@@ -325,9 +351,9 @@
             },
         },
         data: function () {
+            console.log(this);
             return {
                 filteredSize: 0,
-                filterKey: "",
                 sortKey: [],
                 sortOrders: {},
                 sortChanged: 1,
@@ -392,10 +418,11 @@
                     column.visible = true;
                 });
             },
-            filterKey: function () {
-                // filter was updated, so resetting to page 1
-                this.page = 1;
-                this.processFilter();
+            filterKey: {
+                handler: function () {
+                    this.page = 1;
+                    this.processFilter();},
+                deep: true
             },
             sortKey: function () {
                 this.processFilter();
